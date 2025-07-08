@@ -1,8 +1,10 @@
 package com.example.project_mornin.data
 
+import com.example.project_mornin.data.dto.InterestsDto
 import com.example.project_mornin.domain.repository.InterestsRepository
 import com.example.project_mornin.domain.entity.InterestsEntity
 import com.example.project_mornin.domain.entity.MorninTopic
+import kotlinx.coroutines.delay
 
 class InterestsDataTemp : InterestsRepository {
 
@@ -10,24 +12,24 @@ class InterestsDataTemp : InterestsRepository {
         // Static mutable map to store interests data
         private val interestsMap = mutableMapOf<String, InterestsEntity>().apply {
             // Pre-populate with some dummy data
-            put("user1", object : InterestsEntity {
-                override val id: String = "user1"
-                override val profileId: String = "user1"
-                override val topics: List<MorninTopic> = listOf(
+            put("user1", InterestsDto(
+                id = "user1",
+                profileId = "user1",
+                topics = listOf(
                     MorninTopic.BUSINESS,
                     MorninTopic.ENTERTAINMENT,
                     MorninTopic.TECHNOLOGY
-
                 )
-            })
+            ))
         }
     }
 
-    override fun getInterests(id: String): InterestsEntity {
+    override suspend fun getInterests(id: String): InterestsEntity {
+        delay(750)
         return interestsMap[id] ?: throw NoSuchElementException("No interests found for id: $id")
     }
 
-    override fun updateInterests(id: String, interests: InterestsEntity): Boolean {
+    override suspend fun updateInterests(id: String, interests: InterestsEntity): Boolean {
         return if (interestsMap.containsKey(id)) {
             interestsMap[id] = interests
             true
@@ -36,11 +38,11 @@ class InterestsDataTemp : InterestsRepository {
         }
     }
 
-    override fun deleteInterests(id: String): Boolean {
+    override suspend fun deleteInterests(id: String): Boolean {
         return interestsMap.remove(id) != null
     }
 
-    override fun addInterests(interests: InterestsEntity): Boolean {
+    override suspend fun addInterests(interests: InterestsEntity): Boolean {
         val id = interests.id
         return if (!interestsMap.containsKey(id)) {
             interestsMap[id] = interests

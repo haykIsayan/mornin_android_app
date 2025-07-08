@@ -11,7 +11,7 @@ class ArticleMapper {
             override val description: String = article.description ?: ""
             override val content: String = article.content ?: ""
             override val imageUrl: String = article.urlToImage ?: ""
-            override val author: String = article.author ?: "Unknown"
+            override val author: String = article.source.name
             override val date: String = article.publishedAt
             override val topic: MorninTopic = topic
         }

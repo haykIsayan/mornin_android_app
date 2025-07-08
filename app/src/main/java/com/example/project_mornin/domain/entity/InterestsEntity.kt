@@ -4,4 +4,6 @@ interface InterestsEntity {
     val id: String
     val profileId: String
     val topics : List<MorninTopic>
+
+    fun withTopics(topics: List<MorninTopic>): InterestsEntity
 }

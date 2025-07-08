@@ -1,37 +1,28 @@
 package com.example.project_mornin.features.mornin
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -42,16 +33,21 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_mornin.R
 import com.example.project_mornin.domain.entity.MorninEntity
-import com.example.project_mornin.ui.theme.NeutralGray
+import com.example.project_mornin.features.mornin.interests.InterestsGrid
+import com.example.project_mornin.features.mornin.interests.InterestsViewModel
 import com.example.project_mornin.ui.theme.PrimaryOrange
 
 @Composable
 fun MorninScreen(
-    viewModel: MorninViewModel = hiltViewModel()
+    interestsViewModel: InterestsViewModel = hiltViewModel(),
+    morninViewModel: MorninViewModel = hiltViewModel()
 ) {
     Column {
         MorninHeader()
-        MorninContent(viewModel = viewModel)
+        MorninScreenState(
+            interestsViewModel,
+            morninViewModel
+        )
     }
 }
 
@@ -103,40 +99,62 @@ fun MorninHeader() {
             horizontalArrangement = Arrangement.End
         ) {
             Icon(
-                Icons.Default.Search,
+                Icons.Filled.Search,
                 contentDescription = "bruh",
                 modifier = Modifier
-//                    .padding(8.dp)
-                    .size(24.dp)
-                    .wrapContentSize(Alignment.Center),
-            )
-            Spacer(
-                modifier = Modifier.width(8.dp)
-            )
-            Icon(
-                Icons.Default.MoreVert,
-                contentDescription = "bruh",
-                modifier = Modifier
-//                    .padding(8.dp)
                     .size(24.dp)
                     .wrapContentSize(Alignment.Center),
             )
         }
     }
+}
 
+@Composable
+fun MorninScreenState(
+    interestsViewModel: InterestsViewModel,
+    morninViewModel: MorninViewModel
+) {
+   Column {
+        InterestsFilter(
+            interestsViewModel,
+            morninViewModel
+        )
+        MorninFeed(morninViewModel)
+   }
+}
 
+@Composable
+fun InterestsFilter(
+    interestsViewModel: InterestsViewModel,
+    morninViewModel: MorninViewModel
+) {
+    when (val interestsState = interestsViewModel.getState().collectAsState().value) {
+        is UiState.Loading -> {
+            // Show loading state if needed
+        }
+        is UiState.Success -> {
+            val interests = interestsState.data.interests
+            LaunchedEffect(interests) {
+                morninViewModel.fetchMorninFeed(interests)
+            }
+            InterestsGrid(interestsState.data) { selectedTopic ->
+                interestsViewModel.updateInterests(selectedTopic)
+            }
+        }
+        is UiState.Error -> {
+
+        }
+    }
 
 }
 
 @Composable
-fun MorninContent(
-    viewModel: MorninViewModel
-) {
-    when (val state = viewModel.uiState.collectAsState().value) {
-        is MorninUiState.Loading -> MorninLoading()
-        is MorninUiState.Success -> MorninContent(state.data)
-        is MorninUiState.Error -> MorninError(state.message) {
-            viewModel.fetchMorninFeed()
+fun MorninFeed(morninViewModel: MorninViewModel) {
+    when (val state = morninViewModel.uiState.collectAsState().value) {
+        is UiState.Loading -> MorninLoading()
+        is UiState.Success -> MorninGrid(state.data)
+        is UiState.Error -> MorninError(state.message) {
+            morninViewModel.fetchMorninFeed()
         }
     }
 }
@@ -150,11 +168,6 @@ fun MorninLoading() {
     ) {
         CircularProgressIndicator()
     }
-}
-
-@Composable
-fun MorninContent(data: List<MorninEntity>) {
-    MorninGrid(mornins = data)
 }
 
 @Composable

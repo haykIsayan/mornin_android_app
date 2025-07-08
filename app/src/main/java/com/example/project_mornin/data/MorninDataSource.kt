@@ -16,7 +16,7 @@ class MorninDataSource(
 ): MorninRepository {
 
     companion object {
-        private const val DEFAULT_PAGE_SIZE = 22
+        private const val DEFAULT_PAGE_SIZE = 32
     }
 
     override suspend fun getMorninFeed(

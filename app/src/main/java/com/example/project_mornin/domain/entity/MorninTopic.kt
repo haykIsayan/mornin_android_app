@@ -1,5 +1,15 @@
 package com.example.project_mornin.domain.entity
 
+
+//business
+//entertainment
+//general
+//health
+//science
+//sports
+//technology
+
+
 enum class MorninTopic {
     TECHNOLOGY,
     SCIENCE,
@@ -7,7 +17,6 @@ enum class MorninTopic {
     BUSINESS,
     ENTERTAINMENT,
     SPORTS,
-    WORLD,
     POLITICS,
     ART,
     CULTURE,
@@ -18,6 +27,18 @@ enum class MorninTopic {
     LIFESTYLE;
 
     companion object {
+
+        fun getAvailableTopics(): List<MorninTopic> {
+            return entries.filter {
+                it == ENTERTAINMENT ||
+                        it == TECHNOLOGY ||
+                        it == SCIENCE ||
+                        it == HEALTH ||
+                        it == BUSINESS ||
+                        it == SPORTS
+            }
+        }
+
         fun fromString(topic: String): MorninTopic {
             return entries.firstOrNull { it.name.equals(topic, ignoreCase = true) }
                 ?: throw IllegalArgumentException("Unknown topic: $topic")
